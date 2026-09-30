@@ -1,63 +1,48 @@
-import { Tabs } from 'expo-router';
-import { Home, Disc3, Search, Settings as SettingsIcon } from 'lucide-react-native';
-import { Colors } from '@/theme/colors';
-import { StyleSheet, View } from 'react-native';
+import { useEffect } from 'react';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useFonts } from 'expo-font';
+import { SplashScreen } from 'expo-router';
+import { useFrameworkReady } from '@/hooks/useFrameworkReady';
+import { AudioProvider } from '@/context/AudioProvider';
+import {
+  Manrope_400Regular,
+  Manrope_500Medium,
+  Manrope_600SemiBold,
+  Manrope_700Bold,
+  Manrope_800ExtraBold,
+} from '@expo-google-fonts/manrope';
 
-export default function TabLayout() {
+SplashScreen.preventAutoHideAsync();
+
+export default function RootLayout() {
+  useFrameworkReady();
+
+  const [fontsLoaded, fontError] = useFonts({
+    'Manrope-Regular': Manrope_400Regular,
+    'Manrope-Medium': Manrope_500Medium,
+    'Manrope-SemiBold': Manrope_600SemiBold,
+    'Manrope-Bold': Manrope_700Bold,
+    'Manrope-ExtraBold': Manrope_800ExtraBold,
+  });
+
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: Colors.primary[400],
-        tabBarInactiveTintColor: Colors.neutral[50],
-        tabBarLabelStyle: styles.tabLabel,
-        tabBarItemStyle: styles.tabItem,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Library',
-          tabBarIcon: ({ size, color }) => <Home size={size} color={color} strokeWidth={2} />,
-        }}
-      />
-      <Tabs.Screen
-        name="search"
-        options={{
-          title: 'Search',
-          tabBarIcon: ({ size, color }) => <Search size={size} color={color} strokeWidth={2} />,
-        }}
-      />
-      <Tabs.Screen
-        name="playlists"
-        options={{
-          title: 'Playlists',
-          tabBarIcon: ({ size, color }) => <Disc3 size={size} color={color} strokeWidth={2} />,
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          tabBarIcon: ({ size, color }) => <SettingsIcon size={size} color={color} strokeWidth={2} />,
-        }}
-      />
-    </Tabs>
+    <AudioProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="+not-found" />
+      </Stack>
+      <StatusBar style="light" />
+    </AudioProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  tabBar: {
-    backgroundColor: Colors.neutral[95],
-    borderTopColor: Colors.neutral[80],
-    borderTopWidth: 0.5,
-    height: 64,
-    paddingTop: 8,
-    paddingBottom: 8,
-  },
-  tabLabel: {
-    fontFamily: 'Manrope-Medium',
-    fontSize: 11,
-  },
-  tabItem: {},
-});
